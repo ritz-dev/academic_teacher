@@ -21,6 +21,7 @@ class ApiProvider {
         debugPrint("Response Body ${response.body}");
 
         final Map<String, dynamic> data = jsonDecode(response.body);
+
         if (response.statusCode == 200) {
           saveToken(data['token']);
           return data['token'];

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 abstract class AuthenticationState extends Equatable{
   @override
@@ -21,6 +22,10 @@ class Unauthenticated extends AuthenticationState{
 class AuthenticationSuccess extends AuthenticationState{
   final String token;
   AuthenticationSuccess(this.token);
+
+  // AuthenticationSuccess(this.token){
+  //   debugPrint('Success is $token');
+  // }
 
   @override
   List<Object> get props => [token];

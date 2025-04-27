@@ -1,4 +1,5 @@
 import 'package:academic_teacher/data/user_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:academic_teacher/bloc/auth/authentication_event.dart';
 import 'package:academic_teacher/bloc/auth/authentication_state.dart';
@@ -18,9 +19,11 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent,AuthenticationState>{
 
      try {
       final token = await userRepository.login(event.email, event.password);
+      debugPrint('Token is $token');
 
       emit(AuthenticationSuccess(token));
     } catch (e) {
+      debugPrint("Authentication Failed");
       emit(AuthenticationFailure(e.toString()));
     }
   }

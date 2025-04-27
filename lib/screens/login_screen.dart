@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController(text: 'superpassword');
   final _formKey = GlobalKey<FormState>();
   String? _token;
+  String? _message;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,8 +96,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
-                  _buildLoginButton(context),
+                  const SizedBox(height: 20),
+                    BlocConsumer<AuthenticationBloc, AuthenticationState>(
+                      listener: (context, state) {
+                        if (state is AuthenticationFailure) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Login Failed: ${state.error}')),
+                          );
+                        } else if (state is AuthenticationSuccess) {
+                          setState(() {
+                            _token = state.token;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Login Success')),
+                          );
+                        } else if (state is Unauthenticated) {
+                          setState(() {
+                            _token = state.token;
+                            _message = '';
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Logout...')),
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is AuthenticationLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        return _buildLoginButton(context);
+                      },
+                    ),
                 ],
               )
               )
@@ -111,7 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginButton(BuildContext context) {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
+        debugPrint('_Token is $_token');
         final isAuthenticated = _token != null && _token!.isNotEmpty;
+        debugPrint('Is Authenticated is $isAuthenticated');
         return SizedBox(
           width: double.infinity,
           height: 50,
@@ -125,6 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             onPressed: () {
               if (isAuthenticated) {
+                debugPrint('Authentication Logout');
                 context.read<AuthenticationBloc>().add(LogoutRequested());
               } else {
                 if (_formKey.currentState!.validate()) {
