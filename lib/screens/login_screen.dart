@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Wait until the AuthenticationBloc has updated the state
       if (authState is Authenticated) {
         // Use GoRouter to navigate to the home screen
-        GoRouter.of(context).go('/Welcome_screen');
+        GoRouter.of(context).go('/welcome_screen');
       } else if (authState is Unauthenticated ||
           authState is AuthenticationFailure) {
         // Use GoRouter to navigate to the login screen
