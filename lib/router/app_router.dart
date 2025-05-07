@@ -9,60 +9,69 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-class AppRouter{
+class AppRouter {
   final AuthenticationBloc authBloc;
 
   AppRouter(this.authBloc);
 
-  late final GoRouter router = GoRouter( 
+  late final GoRouter router = GoRouter(
     refreshListenable: GoRouterRefreshBloc(authBloc.stream),
     initialLocation: '/',
     routes: [
       GoRoute(
+        path: '/',
+        builder: (context, state) {
+          // final appName = state.pathParameters['appName'] ?? '';
+          return WelcomeScreen(appName: "Welcome");
+        },
+      ),
+      GoRoute(
         path: '/login',
-         builder: (context, state) {
-            // final appName = state.pathParameters['appName'] ?? '';
-            return LoginScreen(appName: "Academic Teacher");
-          },
-        ),
+        builder: (context, state) {
+          // final appName = state.pathParameters['appName'] ?? '';
+          return LoginScreen(appName: "Academic Teacher");
+        },
+      ),
 
-        GoRoute(
-          path: '/welcome_screen',
-          builder: (context,state) {
-            // final appName = state.pathParameters['appName'] ?? '';
-            return WelcomeScreen(appName: "Welcome");
-          }
-        ),
+      GoRoute(
+        path: '/welcome_screen',
+        builder: (context, state) {
+          // final appName = state.pathParameters['appName'] ?? '';
+          return WelcomeScreen(appName: "Welcome");
+        },
+      ),
 
-        GoRoute(
-          path: '/settings_screen',
-          builder:(context,state){
-            return SettingsScreen(appName: "Settings");
-          }
-        )
-      ], 
+      GoRoute(
+        path: '/settings_screen',
+        builder: (context, state) {
+          return SettingsScreen(appName: "Settings");
+        },
+      ),
+    ],
 
-      redirect: (context, state) {
-        final authState = authBloc.state;
-        debugPrint('Matched location: ${state.matchedLocation}');
-        
-        if (authState is AuthenticationInitial || authState is AuthenticationLoading) {
-          return '/login';
-        }
+    redirect: (context, state) {
+      final authState = authBloc.state;
+      debugPrint('Matched location: ${state.matchedLocation}');
 
-        if (authState is Unauthenticated || authState is AuthenticationFailure) {
-          return '/login';
-        }
+      if (authState is AuthenticationInitial ||
+          authState is AuthenticationLoading) {
+        return '/login';
+      }
 
-        // state.matchedLocation == '/login' || 
+      if (authState is Unauthenticated || authState is AuthenticationFailure) {
+        return '/login';
+      }
 
-        if (authState is AuthenticationSuccess && (state.matchedLocation == '/' || state.matchedLocation == '/login')) {
-            return '/welcome_screen';
-        }
+      // state.matchedLocation == '/login' ||
 
-        return null;
-      },
-    );
+      if (authState is Authenticated &&
+          (state.matchedLocation == '/' || state.matchedLocation == '/login')) {
+        return '/welcome_screen';
+      }
+
+      return null;
+    },
+  );
 
   Future<void> initAppName() async {
     final info = await PackageInfo.fromPlatform();
