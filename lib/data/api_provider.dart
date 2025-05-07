@@ -1,16 +1,23 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:academic_teacher/storage/web_auth_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ApiProvider {
 
   static const String _baseUrlApi = "https://api-main-drk8yx.laravel.cloud/gateway";
 
-  final storage = const FlutterSecureStorage();
+  final WebAuthStorage storage = WebAuthStorage();
 
   Future<String> login(String email,String password) async{
+    // if(email == "superadmin@example.com" && password == "superpassword")
+    // {
+      
+    // }
+    // saveToken('token');
+    // return 'token';
       try{
         debugPrint("This is login");
         final response = await http.post(
@@ -23,7 +30,7 @@ class ApiProvider {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
         if (response.statusCode == 200) {
-          saveToken(data['token']);
+          await storage.saveToken(data['token']);
           return data['token'];
         } else {
           throw Exception(data['message']);
@@ -38,15 +45,8 @@ class ApiProvider {
       }
   }
 
-  Future<void> saveToken(String token) async{
-    await storage.write(key: 'auth_token',value: token);
-  }
-
-  Future<String?> getToken() async {
-    return await storage.read(key: "auth_token");
-  }
-
-  Future<void> removeToken() async {
-    await storage.delete(key: "auth_token");
-  }
+  Future<void> saveAuthToken(String token) async => storage.saveToken(token);
+  Future<String?> getAuthToken() async => storage.getToken();
+  Future<void> deleteAuthToken() async => storage.deleteToken();
+  Future<bool> isAuthenticated() async => (await getAuthToken()) != null;
 }

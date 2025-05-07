@@ -1,3 +1,4 @@
+import 'package:academic_teacher/bloc/api_settings/api_settings_bloc.dart';
 import 'package:academic_teacher/bloc/auth/authentication_bloc.dart';
 import 'package:academic_teacher/bloc/auth/authentication_state.dart';
 import 'package:academic_teacher/data/user_repository.dart';
@@ -6,34 +7,48 @@ import 'package:flutter/material.dart';
 import 'package:academic_teacher/screens/main_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'router/app_router.dart';
 
 void main() {
   final UserRepository userRepository = UserRepository();
+  final authBloc = AuthenticationBloc(userRepository: userRepository);
+  
+
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context)=>AuthenticationBloc(userRepository))
+        BlocProvider<AuthenticationBloc>.value(value: authBloc),
+        BlocProvider<ApiSettingsBloc>(create: (context) => ApiSettingsBloc(),),
       ], 
-      child: MyApp(userRepository: userRepository),
+      child: MyApp(
+          userRepository: userRepository,
+          authBloc: authBloc
+        ),
       )
   );
 }
 
 class MyApp extends StatefulWidget {
+
   final UserRepository userRepository;
-  const MyApp({super.key, required this.userRepository});
+  final AuthenticationBloc authBloc;
+
+  const MyApp({super.key, required this.userRepository, required this.authBloc});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  late final AppRouter appRouter;
   String appName = '';
 
   @override
   void initState() {
     super.initState();
+    appRouter = AppRouter(widget.authBloc);
     _getAppInfo();
+    _fetchUser();
   }
 
   Future<void> _getAppInfo() async {
@@ -41,6 +56,11 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       appName = _formatAppName(info.appName);
     });
+  }
+
+  Future<void> _fetchUser() async {
+    // Fetch the authenticated user once the app is initialized
+    context.read<ApiSettingsBloc>().add(FetchAuthenticatedUser());
   }
 
   String _formatAppName(String name) {
@@ -55,22 +75,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
 
-    return BlocBuilder<AuthenticationBloc,AuthenticationState>(
-      builder: (context,state){
-          String initialRoute = (state is Authenticated) ? '/welcome_screen' : '/';
-          return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: appName.isEmpty ? 'Loading...' : appName,
-            initialRoute: initialRoute,
-            routes: {
-              '/': (context) => MainScreen(appName: appName),
-              '/welcome_screen': (context) => WelcomeScreen(appName:appName),
-            },
-          );
-        }
+      return MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        title: 'Auth GoRouter App',
+        routerConfig: appRouter.router,
       );
+         
+       
     }
   }
   
-  class Authenticated {
-  }

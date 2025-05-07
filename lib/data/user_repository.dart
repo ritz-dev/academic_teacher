@@ -8,6 +8,6 @@ class UserRepository {
   }
 
   Future<void> removeToken(){
-    return _apiProvider.removeToken();
+    return _apiProvider.deleteAuthToken();
   }
 }

@@ -4,6 +4,7 @@ import 'package:academic_teacher/bloc/auth/authentication_state.dart';
 import 'package:academic_teacher/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   final String appName;
@@ -109,10 +110,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           setState(() {
                             _token = state.token;
                           });
-                          Navigator.pushReplacement(
-                            context,
-                            Navigator.pushReplacementNamed(context, '/welcome_screen') as Route<Object?>
-                          );
+                          // Navigator.pushReplacement(
+                          //   context,
+                          //   Navigator.pushReplacementNamed(context, '/welcome_screen') as Route<Object?>
+                          // );
+                          context.go('/welcome_screen');
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Login Success')),
                           );

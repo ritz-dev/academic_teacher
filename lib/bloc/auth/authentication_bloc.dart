@@ -5,9 +5,9 @@ import 'package:academic_teacher/bloc/auth/authentication_event.dart';
 import 'package:academic_teacher/bloc/auth/authentication_state.dart';
 
 class AuthenticationBloc extends Bloc<AuthenticationEvent,AuthenticationState>{
-     final UserRepository userRepository;
+    final UserRepository userRepository;
      
-     AuthenticationBloc(this.userRepository) : super(AuthenticationInitial()) {
+    AuthenticationBloc({required this.userRepository}) : super(AuthenticationInitial()) {
     // Define how each event will be handled
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
@@ -19,8 +19,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent,AuthenticationState>{
 
      try {
       final token = await userRepository.login(event.email, event.password);
-      debugPrint('Token is $token');
-
+      
       emit(AuthenticationSuccess(token));
     } catch (e) {
       debugPrint("Authentication Failed");
